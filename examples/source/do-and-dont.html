@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Do and Don't</title>
+  <link rel="stylesheet" href="../../tokens/tokens.css">
+  <style>
+    html, body {
+      margin: 0;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+      background: var(--ct-bg0);
+      font-family: var(--ct-font-mono);
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    .board { position: relative; width: 1280px; height: 800px; background: var(--ct-bg0); }
+
+    /* ---- Light overlay: status bar docked at the top edge ---- */
+    .statusbar {
+      position: absolute; left: 0; top: 0; width: 1280px; height: 38px;
+      background: var(--ct-chrome-bg);
+      border-bottom: 1px solid var(--ct-chrome-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 var(--ct-space-8);
+    }
+    .wordmark {
+      font-size: var(--ct-font-size-chrome); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-fg); white-space: nowrap;
+    }
+    .wordmark .mark { color: var(--ct-chrome-muted); font-weight: 400; }
+    .readouts { display: flex; align-items: center; }
+    .readout {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-muted); white-space: nowrap;
+      padding: 0 var(--ct-space-6);
+    }
+    .readout + .readout { border-left: 1px solid var(--ct-chrome-border); }
+
+    /* ---- Header: title and DO / DON'T key ---- */
+    .head {
+      position: absolute; left: 40px; top: 50px; width: 1200px; height: 54px;
+      display: flex; align-items: flex-end; justify-content: space-between;
+    }
+    .eyebrow {
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+      margin-bottom: var(--ct-space-2);
+    }
+    .h1 {
+      margin: 0; font-family: var(--ct-font-serif);
+      font-size: calc(var(--ct-font-size-body) * 1.4);
+      line-height: var(--ct-line-height-heading); color: var(--ct-fg1);
+    }
+    .lede {
+      margin-top: var(--ct-space-2);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+    .key { display: flex; align-items: center; gap: var(--ct-space-8); padding-bottom: var(--ct-space-2); }
+    .keyitem {
+      display: flex; align-items: center; gap: var(--ct-space-3);
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+    .swatch { width: var(--ct-space-6); height: var(--ct-space-6); border-radius: var(--ct-radius); }
+    .swatch.do { background: var(--ct-green); }
+    .swatch.dont { background: var(--ct-red); }
+
+    /* ---- Contrast board: five pairs in a two-column grid ---- */
+    .grid {
+      position: absolute; left: 40px; top: 116px; width: 1200px; height: 644px;
+      display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr);
+      gap: var(--ct-space-7);
+    }
+    .pair {
+      display: flex; flex-direction: column; overflow: hidden;
+      border: 1px solid var(--ct-bg3); border-radius: var(--ct-radius);
+      background: var(--ct-bg0);
+    }
+    .phead {
+      flex: 0 0 24px; height: 24px; display: flex; align-items: center;
+      gap: var(--ct-space-4); padding: 0 var(--ct-space-5);
+      background: var(--ct-bg1); border-bottom: 1px solid var(--ct-bg3);
+    }
+    .pnum {
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure); color: var(--ct-fg4);
+    }
+    .ptitle {
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg1);
+    }
+    .ptag {
+      margin-left: auto;
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+
+    .panels { flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: 0; }
+    .side { display: flex; flex-direction: column; min-width: 0; background: var(--ct-bg0); }
+    .side + .side { border-left: 1px solid var(--ct-bg3); }
+    .slabel {
+      flex: 0 0 22px; height: 22px; display: flex; align-items: center;
+      gap: var(--ct-space-3); padding: 0 var(--ct-space-5);
+      border-bottom: 1px solid var(--ct-bg3);
+    }
+    .slabel .tag {
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+    }
+    .slabel .desc {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+    .s-do .slabel .tag { color: var(--ct-green); }
+    .s-dont .slabel .tag { color: var(--ct-red); }
+    .demo {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: var(--ct-space-5); overflow: hidden; min-height: 0;
+    }
+    .rationale {
+      flex: 0 0 28px; height: 28px; display: flex; align-items: center;
+      padding: 0 var(--ct-space-5); border-top: 1px solid var(--ct-bg3);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+      white-space: nowrap; overflow: hidden;
+    }
+
+    /* ---- Pair 1: word-labelled control vs unlabelled glyph ---- */
+    .btn-word {
+      background: var(--ct-bg1); border: 1px solid var(--ct-bg4);
+      border-radius: var(--ct-radius); box-shadow: none;
+      padding: var(--ct-space-4) var(--ct-space-8);
+      font-family: var(--ct-font-mono); font-size: var(--ct-font-size-label);
+      font-weight: 700; letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg1);
+    }
+    .glyph { width: 30px; height: 28px; position: relative; border: 2px solid var(--ct-fg3); border-radius: var(--ct-radius); }
+    .glyph::before {
+      content: ""; position: absolute; left: 6px; top: -2px; width: 12px; height: 8px;
+      border: 2px solid var(--ct-fg3); border-bottom: none;
+    }
+    .glyph::after {
+      content: ""; position: absolute; left: 6px; bottom: 4px; width: 14px; height: 2px;
+      background: var(--ct-fg3); box-shadow: 0 var(--ct-space-3) 0 var(--ct-fg3);
+    }
+
+    /* ---- Pair 2: flat hairline panel vs rounded gradient card ---- */
+    .flatpanel {
+      width: 224px; height: 96px; padding: var(--ct-space-5);
+      background: var(--ct-bg1); border: 1px solid var(--ct-bg3);
+      border-radius: var(--ct-radius); box-shadow: none;
+      display: flex; flex-direction: column; gap: var(--ct-space-3);
+    }
+    .flatpanel .fprow {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg2);
+      border-bottom: 1px solid var(--ct-bg3); padding-bottom: var(--ct-space-2);
+    }
+    .roundcard {
+      width: 224px; height: 96px; padding: var(--ct-space-5);
+      background: linear-gradient(135deg, var(--ct-bg1), var(--ct-bg4));
+      border-radius: calc(var(--ct-space-8) + var(--ct-space-6));
+      box-shadow: 0 0 calc(var(--ct-space-8)) var(--ct-bg2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg1);
+    }
+
+    /* ---- Pair 3: sand on the active edge vs a blue inner ring ---- */
+    .win-edge {
+      width: 232px; height: 96px; padding: var(--ct-space-4);
+      border: 2px solid var(--ct-focus-sand); border-radius: var(--ct-radius);
+      background: var(--ct-bg0);
+      display: flex; flex-direction: column; gap: var(--ct-space-3);
+    }
+    .win-wrong {
+      width: 232px; height: 96px; padding: var(--ct-space-4);
+      border: 2px solid var(--ct-focus-unfocused); border-radius: var(--ct-radius);
+      background: var(--ct-bg0);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .wintitle {
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg2);
+    }
+    .innerctl {
+      align-self: flex-start; background: var(--ct-bg1);
+      border: 1px solid var(--ct-bg3); border-radius: var(--ct-radius);
+      padding: 2px var(--ct-space-4);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg2);
+    }
+    .blue-ring {
+      background: var(--ct-bg1); border-radius: var(--ct-radius);
+      padding: 2px var(--ct-space-4);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg1);
+      box-shadow: 0 0 0 2px var(--ct-color-link), 0 0 0 var(--ct-space-4) var(--ct-blue-bright);
+    }
+
+    /* ---- Pair 4: status chip plus word vs color alone ---- */
+    .status-strip {
+      width: 224px; padding: var(--ct-space-4) var(--ct-space-5);
+      background: var(--ct-bg1); border: 1px solid var(--ct-bg3);
+      border-radius: var(--ct-radius); box-shadow: none;
+      display: flex; align-items: center; gap: var(--ct-space-4);
+    }
+    .chip { width: var(--ct-space-6); height: var(--ct-space-6); background: var(--ct-color-action); border-radius: var(--ct-radius); }
+    .state-word {
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg1);
+    }
+    .chip-center { justify-content: center; }
+
+    /* ---- Pair 5: dense explicit sheet vs an empty card ---- */
+    .dense {
+      width: 240px; height: 110px; padding: var(--ct-space-3);
+      background: var(--ct-bg1); border: 1px solid var(--ct-bg3);
+      border-radius: var(--ct-radius);
+      display: flex; flex-direction: column; gap: var(--ct-space-1);
+    }
+    .drow {
+      display: flex; justify-content: space-between; gap: var(--ct-space-4);
+      font-size: var(--ct-font-size-label); line-height: var(--ct-line-height-heading);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg2);
+      border-bottom: 1px solid var(--ct-bg3); padding-bottom: var(--ct-space-1);
+    }
+    .drow .val { color: var(--ct-fg4); }
+    .sparse {
+      width: 224px; height: 108px;
+      background: var(--ct-bg1); border: 1px solid var(--ct-bg3);
+      border-radius: var(--ct-radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+
+    .foot {
+      position: absolute; left: 40px; top: 772px; width: 1200px;
+      padding-top: var(--ct-space-2); border-top: 1px solid var(--ct-bg3);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+  </style>
+</head>
+<body>
+  <div class="board">
+
+    <div class="statusbar">
+      <div class="wordmark"><span class="mark">//</span> Controlled Technical Design</div>
+      <div class="readouts">
+        <div class="readout">Spec 10</div>
+        <div class="readout">Contrast board</div>
+        <div class="readout">Do / Don't</div>
+      </div>
+    </div>
+
+    <div class="head">
+      <div>
+        <div class="eyebrow">// Spec 10 / five rule pairs</div>
+        <h1 class="h1">Do and Don't</h1>
+        <div class="lede">Right practice shown beside its failure</div>
+      </div>
+      <div class="key">
+        <div class="keyitem"><span class="swatch do"></span> Do / correct</div>
+        <div class="keyitem"><span class="swatch dont"></span> Don't / avoid</div>
+      </div>
+    </div>
+
+    <div class="grid">
+
+      <div class="pair">
+        <div class="phead"><span class="pnum">01</span><span class="ptitle">Control label</span><span class="ptag">Word over glyph</span></div>
+        <div class="panels">
+          <div class="side s-do">
+            <div class="slabel"><span class="tag">DO</span><span class="desc">word label</span></div>
+            <div class="demo"><span class="btn-word">Save</span></div>
+          </div>
+          <div class="side s-dont">
+            <div class="slabel"><span class="tag">DON'T</span><span class="desc">glyph only</span></div>
+            <div class="demo"><span class="glyph"></span></div>
+          </div>
+        </div>
+        <div class="rationale">Controls are word-labelled; no hidden affordances.</div>
+      </div>
+
+      <div class="pair">
+        <div class="phead"><span class="pnum">02</span><span class="ptitle">Surface shape</span><span class="ptag">Flat over soft</span></div>
+        <div class="panels">
+          <div class="side s-do">
+            <div class="slabel"><span class="tag">DO</span><span class="desc">flat hairline</span></div>
+            <div class="demo">
+              <div class="flatpanel">
+                <span class="fprow">Structure / panel</span>
+                <span class="fprow">Edge / hairline</span>
+                <span class="fprow">Radius / zero</span>
+              </div>
+            </div>
+          </div>
+          <div class="side s-dont">
+            <div class="slabel"><span class="tag">DON'T</span><span class="desc">rounded gradient</span></div>
+            <div class="demo"><div class="roundcard">Soft card</div></div>
+          </div>
+        </div>
+        <div class="rationale">Flat, hairline, zero radius; no gradient or soft shadow.</div>
+      </div>
+
+      <div class="pair">
+        <div class="phead"><span class="pnum">03</span><span class="ptitle">Focus marker</span><span class="ptag">One edge</span></div>
+        <div class="panels">
+          <div class="side s-do">
+            <div class="slabel"><span class="tag">DO</span><span class="desc">sand edge</span></div>
+            <div class="demo">
+              <div class="win-edge">
+                <span class="wintitle">Active sheet</span>
+                <span class="innerctl">Field</span>
+              </div>
+            </div>
+          </div>
+          <div class="side s-dont">
+            <div class="slabel"><span class="tag">DON'T</span><span class="desc">blue ring</span></div>
+            <div class="demo">
+              <div class="win-wrong"><span class="blue-ring">Field</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="rationale">One focus edge; no second hue.</div>
+      </div>
+
+      <div class="pair">
+        <div class="phead"><span class="pnum">04</span><span class="ptitle">Status readout</span><span class="ptag">Color plus word</span></div>
+        <div class="panels">
+          <div class="side s-do">
+            <div class="slabel"><span class="tag">DO</span><span class="desc">chip + word</span></div>
+            <div class="demo">
+              <div class="status-strip"><span class="chip"></span><span class="state-word">Active</span></div>
+            </div>
+          </div>
+          <div class="side s-dont">
+            <div class="slabel"><span class="tag">DON'T</span><span class="desc">color only</span></div>
+            <div class="demo">
+              <div class="status-strip chip-center"><span class="chip"></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="rationale">Color states a fact alongside a word.</div>
+      </div>
+
+      <div class="pair">
+        <div class="phead"><span class="pnum">05</span><span class="ptitle">Sheet density</span><span class="ptag">Explicit over empty</span></div>
+        <div class="panels">
+          <div class="side s-do">
+            <div class="slabel"><span class="tag">DO</span><span class="desc">dense sheet</span></div>
+            <div class="demo">
+              <div class="dense">
+                <div class="drow"><span>State</span><span class="val">Active</span></div>
+                <div class="drow"><span>Shape</span><span class="val">Flat</span></div>
+                <div class="drow"><span>Edge</span><span class="val">Hairline</span></div>
+                <div class="drow"><span>Focus</span><span class="val">Sand</span></div>
+                <div class="drow"><span>Color</span><span class="val">Functional</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="side s-dont">
+            <div class="slabel"><span class="tag">DON'T</span><span class="desc">empty card</span></div>
+            <div class="demo"><div class="sparse">Empty</div></div>
+          </div>
+        </div>
+        <div class="rationale">Density over emptiness; explicit over implied.</div>
+      </div>
+
+    </div>
+
+    <div class="foot">Overlays light; substrates dark; focus sand on the active edge only.</div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <title>Overlay and Substrate</title>
+  <link rel="stylesheet" href="../../tokens/tokens.css">
+  <style>
+    html, body {
+      margin: 0;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+      background: var(--ct-bg0);
+      font-family: var(--ct-font-mono);
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    .board { position: relative; width: 1280px; height: 800px; background: var(--ct-bg0); }
+
+    /* ---- Light overlay: status bar docked at the top edge ---- */
+    .statusbar {
+      position: absolute; left: 0; top: 0; width: 1280px; height: 38px;
+      background: var(--ct-chrome-bg);
+      border-bottom: 1px solid var(--ct-chrome-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 var(--ct-space-8);
+    }
+    .wordmark {
+      font-size: var(--ct-font-size-chrome); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-fg); white-space: nowrap;
+    }
+    .wordmark .mark { color: var(--ct-chrome-muted); font-weight: 400; }
+    .readouts { display: flex; align-items: center; }
+    .readout {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-muted); white-space: nowrap;
+      padding: 0 var(--ct-space-6);
+    }
+    .readout + .readout { border-left: 1px solid var(--ct-chrome-border); }
+
+    /* ---- Dark substrate: the window board and its edge chrome ---- */
+    .window {
+      position: absolute; left: 40px; top: 58px; width: 900px; height: 694px;
+      border: 2px solid var(--ct-focus-unfocused);
+      border-radius: var(--ct-radius);
+      background: var(--ct-bg0);
+    }
+    .winchrome { position: relative; height: 96px; background: var(--ct-bg1); border-bottom: 1px solid var(--ct-bg3); }
+    .tabrow { display: flex; height: 34px; border-bottom: 1px solid var(--ct-bg3); }
+    .tab {
+      display: flex; align-items: center; padding: 0 var(--ct-space-8);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+      border-right: 1px solid var(--ct-bg3); white-space: nowrap;
+    }
+    .tab.active { background: var(--ct-bg0-soft); color: var(--ct-fg1); }
+    .toolrow {
+      display: flex; align-items: center; gap: var(--ct-space-4);
+      height: 28px; padding: 0 var(--ct-space-5);
+      border-bottom: 1px solid var(--ct-bg3);
+    }
+    .tbtn {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg3);
+      border: 1px solid var(--ct-bg4); border-radius: var(--ct-radius);
+      padding: 1px var(--ct-space-4);
+    }
+    .urlrow { display: flex; align-items: center; height: 33px; padding: 0 var(--ct-space-5); }
+    .urlfield {
+      flex: 1; height: 22px; display: flex; align-items: center; gap: var(--ct-space-3);
+      background: var(--ct-bg0); border: 1px solid var(--ct-bg4);
+      border-radius: var(--ct-radius); padding: 0 var(--ct-space-4);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: 0.02em; color: var(--ct-fg2);
+    }
+    .urlfield .scheme { color: var(--ct-color-link); }
+
+    /* ---- Content sheet: a dark content surface framed by dark chrome ---- */
+    .sheet {
+      position: absolute; left: 24px; top: 118px; width: 786px; height: 552px;
+      background: var(--ct-bg0-soft);
+      border: 1px solid var(--ct-bg3);
+      border-radius: var(--ct-radius);
+      box-shadow: var(--ct-shadow-panel);
+      display: flex; overflow: hidden;
+    }
+    .rail {
+      flex: 0 0 214px; background: var(--ct-bg0);
+      border-right: 1px solid var(--ct-bg3);
+      padding: var(--ct-space-6) 0;
+    }
+    .railhead {
+      margin: 0 0 var(--ct-space-5); padding: 0 var(--ct-space-6);
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg2);
+    }
+    .toc { list-style: none; margin: 0; padding: 0; }
+    .toc li {
+      font-size: 11px; line-height: var(--ct-line-height-heading);
+      letter-spacing: 0.02em; padding: var(--ct-space-2) var(--ct-space-6);
+      color: var(--ct-fg4);
+    }
+    .toc li.current {
+      color: var(--ct-fg1); font-weight: 700;
+      border-left: 2px solid var(--ct-fg2);
+      padding-left: calc(var(--ct-space-6) - 2px);
+    }
+    .railfoot {
+      margin: var(--ct-space-7) var(--ct-space-6) 0;
+      padding-top: var(--ct-space-5);
+      border-top: 1px solid var(--ct-bg3);
+      font-size: 10px; line-height: var(--ct-line-height-body);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+    .main {
+      flex: 1; padding: var(--ct-space-8) var(--ct-space-9);
+      color: var(--ct-fg1); overflow: hidden;
+    }
+    .eyebrow {
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+      margin-bottom: var(--ct-space-4);
+    }
+    .h1 {
+      margin: 0 0 var(--ct-space-5);
+      font-family: var(--ct-font-serif);
+      font-size: calc(var(--ct-font-size-body) * 1.5);
+      line-height: var(--ct-line-height-heading);
+      color: var(--ct-fg1);
+    }
+    .core {
+      margin: 0 0 var(--ct-space-6);
+      padding: var(--ct-space-4) var(--ct-space-6);
+      background: var(--ct-bg1);
+      border-left: 2px solid var(--ct-fg2);
+      font-family: var(--ct-font-serif);
+      font-size: calc(var(--ct-font-size-body) * 1.05);
+      line-height: var(--ct-line-height-body);
+      color: var(--ct-fg1);
+    }
+    .body {
+      margin: 0 0 var(--ct-space-6);
+      font-family: var(--ct-font-sans);
+      font-size: var(--ct-font-size-ui);
+      line-height: var(--ct-line-height-body);
+      color: var(--ct-fg2);
+    }
+    .tbl {
+      width: 100%; border-collapse: collapse;
+      font-family: var(--ct-font-mono); font-size: var(--ct-font-size-label);
+    }
+    .tbl th, .tbl td {
+      border: 1px solid var(--ct-bg3);
+      padding: var(--ct-space-3) var(--ct-space-4);
+      text-align: left; vertical-align: top;
+      line-height: var(--ct-line-height-heading);
+    }
+    .tbl th {
+      background: var(--ct-bg1); color: var(--ct-fg2);
+      text-transform: uppercase;
+      letter-spacing: var(--ct-letter-spacing-structure);
+    }
+    .tbl td { color: var(--ct-fg2); }
+    .tbl td.muted { color: var(--ct-fg4); }
+    .subhead {
+      margin: var(--ct-space-6) 0 var(--ct-space-4);
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg2);
+    }
+    .char {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--ct-space-2) var(--ct-space-6);
+      margin: 0; padding: 0; list-style: none;
+      font-family: var(--ct-font-mono); font-size: 10px;
+      line-height: var(--ct-line-height-heading);
+      color: var(--ct-fg4);
+    }
+    .char li { padding-left: var(--ct-space-4); border-left: 1px solid var(--ct-bg3); }
+    .credit {
+      margin: var(--ct-space-6) 0 0; padding-top: var(--ct-space-4);
+      border-top: 1px solid var(--ct-bg3);
+      font-family: var(--ct-font-sans); font-size: 11px;
+      line-height: var(--ct-line-height-body);
+      color: var(--ct-fg4);
+    }
+
+    /* ---- Light overlay: popup floating above the dark chrome ---- */
+    .popup {
+      position: absolute; left: 606px; top: 30px; width: 272px; z-index: 5;
+      background: var(--ct-chrome-bg);
+      border: 1px solid var(--ct-chrome-border);
+      border-radius: var(--ct-radius);
+    }
+    .phead {
+      padding: var(--ct-space-3) var(--ct-space-5);
+      border-bottom: 1px solid var(--ct-chrome-border);
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-muted);
+    }
+    .prow {
+      padding: var(--ct-space-3) var(--ct-space-5);
+      border-bottom: 1px solid var(--ct-chrome-border);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-fg);
+    }
+    .prow.marked {
+      background: var(--ct-chrome-bg1);
+      border-left: 2px solid var(--ct-chrome-border);
+      padding-left: calc(var(--ct-space-5) - 2px);
+      font-weight: 700;
+    }
+    .psep {
+      height: var(--ct-space-3); background: var(--ct-chrome-bg1);
+      border-top: 1px solid var(--ct-chrome-border);
+      border-bottom: 1px solid var(--ct-chrome-border);
+    }
+
+    /* ---- Quiet captions naming the material roles ---- */
+    .legend { position: absolute; left: 962px; top: 58px; width: 288px; }
+    .legend h2 {
+      margin: 0 0 var(--ct-space-7);
+      padding-bottom: var(--ct-space-4);
+      border-bottom: 1px solid var(--ct-bg3);
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg3);
+    }
+    .legend .item { margin-bottom: var(--ct-space-8); }
+    .legend .role {
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg3);
+    }
+    .legend .desc {
+      margin-top: var(--ct-space-2);
+      font-size: 11px; line-height: var(--ct-line-height-body);
+      color: var(--ct-fg4);
+    }
+    .legend .note {
+      margin-top: var(--ct-space-9);
+      padding-top: var(--ct-space-5);
+      border-top: 1px solid var(--ct-bg3);
+      font-size: 10px; line-height: var(--ct-line-height-body);
+      color: var(--ct-fg4);
+    }
+  </style>
+</head>
+<body>
+  <div class="board">
+
+    <div class="statusbar">
+      <div class="wordmark"><span class="mark">//</span> Controlled Technical Design</div>
+      <div class="readouts">
+        <div class="readout">Overlay</div>
+        <div class="readout">Substrate</div>
+        <div class="readout">Content</div>
+        <div class="readout">Focus</div>
+      </div>
+    </div>
+
+    <div class="window">
+      <div class="winchrome">
+        <div class="tabrow">
+          <div class="tab active">00 Philosophy: Overlay and Substrate</div>
+          <div class="tab">01 Overview</div>
+          <div class="tab">02 Color Specification</div>
+        </div>
+        <div class="toolrow">
+          <span class="tbtn">Back</span>
+          <span class="tbtn">Forward</span>
+          <span class="tbtn">Reload</span>
+          <span class="tbtn">Contents</span>
+        </div>
+        <div class="urlrow">
+          <div class="urlfield"><span class="scheme">DOC</span> /spec/00-philosophy</div>
+        </div>
+      </div>
+
+      <div class="sheet">
+        <div class="rail">
+          <div class="railhead">Contents</div>
+          <ol class="toc">
+            <li class="current">00 Philosophy: Overlay and Substrate</li>
+            <li>01 Overview</li>
+            <li>02 Color Specification</li>
+            <li>03 Typography Specification</li>
+            <li>04 Layout &amp; Geometry</li>
+            <li>05 Surface, Shape &amp; Elevation</li>
+            <li>06 Motion</li>
+            <li>07 Iconography</li>
+            <li>08 Components</li>
+            <li>09 Accessibility</li>
+            <li>10 Do and Don't</li>
+            <li>11 Porting</li>
+            <li>12 Decorative Banner</li>
+          </ol>
+          <div class="railfoot">Field (light / soft) over Board (dark / medium)</div>
+        </div>
+
+        <div class="main">
+          <div class="eyebrow">00 / Foundation</div>
+          <h1 class="h1">Philosophy: Overlay and Substrate</h1>
+          <blockquote class="core">Overlays are light; substrates and their edges are dark.</blockquote>
+          <p class="body">Chrome has two categories; the document is the content those surfaces frame.</p>
+
+          <table class="tbl">
+            <thead>
+              <tr><th>Material</th><th>Role</th><th>Ground</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Field (light / soft)</td><td class="muted">overlay, legend, paper, sheet</td><td>&#35;fbf1c7</td></tr>
+              <tr><td>Board (dark / medium)</td><td class="muted">substrate, window interior, edge, frame</td><td>&#35;282828</td></tr>
+            </tbody>
+          </table>
+
+          <div class="subhead">Core character</div>
+          <ul class="char">
+            <li>austere, information-dense, explicit, engineered rather than decorative</li>
+            <li>dense over sparse, verbosity over opacity</li>
+            <li>flat and explicit</li>
+            <li>no hidden affordances</li>
+            <li>functional colour only</li>
+            <li>hairline structure</li>
+          </ul>
+
+          <p class="credit">The palette is gruvbox by Pavel Pertsev (morhetz), licensed MIT/X11.</p>
+        </div>
+      </div>
+
+      <div class="popup">
+        <div class="phead">Content actions</div>
+        <div class="prow">Open content</div>
+        <div class="prow marked">Copy link</div>
+        <div class="psep"></div>
+        <div class="prow">View source</div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <h2>Material roles</h2>
+      <div class="item">
+        <div class="role">Light overlay / floats above dark</div>
+        <div class="desc">status bar, popup menu. Flat, no shadow.</div>
+      </div>
+      <div class="item">
+        <div class="role">Dark substrate / edge</div>
+        <div class="desc">board, window interior, frame, tab strip, toolbar.</div>
+      </div>
+      <div class="item">
+        <div class="role">Content surface = dark</div>
+        <div class="desc">the sheet is a dark surface. Hard offset shadow only here.</div>
+      </div>
+      <div class="note">Overlays are light; substrates and their edges are dark.</div>
+    </div>
+
+  </div>
+</body>
+</html>

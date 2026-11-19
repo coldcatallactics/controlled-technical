@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Surface, Shape &amp; Elevation</title>
+  <link rel="stylesheet" href="../../tokens/tokens.css">
+  <style>
+    html, body {
+      margin: 0;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+      background: var(--ct-bg0);
+      font-family: var(--ct-font-mono);
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    .board { position: relative; width: 1280px; height: 800px; background: var(--ct-bg0); }
+
+    /* ---- Light overlay: status bar docked at the top edge ---- */
+    .statusbar {
+      position: absolute; left: 0; top: 0; width: 1280px; height: 38px;
+      background: var(--ct-chrome-bg);
+      border-bottom: 1px solid var(--ct-chrome-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 var(--ct-space-8);
+    }
+    .wordmark {
+      font-size: var(--ct-font-size-chrome); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-fg); white-space: nowrap;
+    }
+    .wordmark .mark { color: var(--ct-chrome-muted); font-weight: 400; }
+    .readouts { display: flex; align-items: center; }
+    .readout {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-muted); white-space: nowrap;
+      padding: 0 var(--ct-space-6);
+    }
+    .readout + .readout { border-left: 1px solid var(--ct-chrome-border); }
+
+    /* ---- Header: quiet uppercase mono ---- */
+    .header { position: absolute; left: 40px; top: 52px; width: 1160px; }
+    .eyebrow {
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+    .title {
+      margin: var(--ct-space-2) 0 0;
+      font-size: calc(var(--ct-font-size-body) * 1.15); font-weight: 700;
+      line-height: var(--ct-line-height-heading);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg1);
+    }
+    .coreline {
+      margin: var(--ct-space-2) 0 0;
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg3);
+    }
+
+    /* ---- The ONE sanctioned elevation: content sheet only ---- */
+    .sheet {
+      position: absolute; left: 40px; top: 128px; width: 786px; height: 596px;
+      background: var(--ct-color-paper);
+      border: 1px solid var(--ct-bg3);
+      border-radius: var(--ct-radius);
+      box-shadow: var(--ct-shadow-panel);
+    }
+    .sheet-head {
+      position: absolute; left: var(--ct-space-8); top: var(--ct-space-7);
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+
+    /* ---- Specimen cards: square, hairline-bordered, flat ---- */
+    .card {
+      position: absolute; left: var(--ct-space-8); width: 750px;
+      background: var(--ct-bg0);
+      border: 1px solid var(--ct-bg3);
+      border-radius: var(--ct-radius);
+    }
+    .c1 { top: 44px; height: 138px; }
+    .c2 { top: 190px; height: 158px; }
+    .c3 { top: 356px; height: 200px; }
+    .card-head {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: var(--ct-space-3) var(--ct-space-4);
+      border-bottom: 1px solid var(--ct-bg3);
+    }
+    .card-num {
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+    .cap {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg2);
+    }
+    .card-body { padding: var(--ct-space-4); }
+    .tok {
+      margin-top: var(--ct-space-3);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+
+    /* 01 radius zero */
+    .rz-row { display: flex; gap: var(--ct-space-6); }
+    .rz-item { width: 150px; text-align: center; }
+    .rz-box {
+      width: 48px; height: 48px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--ct-bg1);
+      border: 1px solid var(--ct-bg3);
+      border-radius: var(--ct-radius);
+      font-size: var(--ct-font-size-label); color: var(--ct-fg3);
+    }
+    .rz-label {
+      margin-top: var(--ct-space-2);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+
+    /* 02 hairline structure */
+    .struct-row { display: flex; gap: var(--ct-space-6); }
+    .hair-box {
+      flex: 1; height: 44px; padding: var(--ct-space-3);
+      background: var(--ct-bg1);
+      border: 1px solid var(--ct-bg3);
+      border-radius: var(--ct-radius);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg3);
+    }
+    .hair-box.b4 { border-color: var(--ct-bg4); }
+    .dotted {
+      margin-top: var(--ct-space-3); padding-top: var(--ct-space-2);
+      border-top: 1px dotted var(--ct-color-line);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+    .focus-cell {
+      margin-top: var(--ct-space-3);
+      display: inline-block;
+      background: var(--ct-color-focus-element);
+      color: var(--ct-bg0);
+      border: 2px solid var(--ct-color-focus-element);
+      border-radius: var(--ct-radius);
+      padding: var(--ct-space-2) var(--ct-space-4);
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase;
+    }
+
+    /* 03 functional accents */
+    .chip-row { display: flex; gap: var(--ct-space-4); }
+    .chip {
+      flex: 1; min-height: 92px; padding: var(--ct-space-3);
+      background: var(--ct-bg0);
+      border: 1px solid var(--ct-bg3);
+      border-left-width: 3px;
+      border-radius: var(--ct-radius);
+    }
+    .chip.red { border-left-color: var(--ct-color-danger); }
+    .chip.yellow { border-left-color: var(--ct-color-status); }
+    .chip.green { border-left-color: var(--ct-color-action); }
+    .chip.blue { border-left-color: var(--ct-color-link); }
+    .word {
+      display: block;
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg1);
+    }
+    .chip.blue .word { color: var(--ct-blue-bright); text-decoration: underline; }
+    .tk {
+      display: block; margin-top: var(--ct-space-3);
+      font-size: var(--ct-font-size-label);
+      line-height: var(--ct-line-height-heading);
+      letter-spacing: 0.02em; color: var(--ct-fg4);
+    }
+
+    /* ---- Neighbouring light overlay: no shadow, flat control ---- */
+    .overlay {
+      position: absolute; left: 854px; top: 128px; width: 386px; height: 128px;
+      background: var(--ct-chrome-bg);
+      border: 1px solid var(--ct-chrome-border);
+      border-radius: var(--ct-radius);
+    }
+    .phead {
+      padding: var(--ct-space-3) var(--ct-space-5);
+      border-bottom: 1px solid var(--ct-chrome-border);
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-muted);
+    }
+    .prow {
+      padding: var(--ct-space-2) var(--ct-space-5);
+      border-bottom: 1px solid var(--ct-chrome-border);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-fg);
+    }
+    .flatctl {
+      display: inline-block; margin: var(--ct-space-2) var(--ct-space-5);
+      padding: var(--ct-space-1) var(--ct-space-3);
+      background: var(--ct-chrome-bg);
+      border: 1px solid var(--ct-chrome-border);
+      border-radius: var(--ct-radius);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-fg);
+    }
+    .cap-elev {
+      position: absolute; left: 854px; top: 268px; width: 386px;
+      font-size: var(--ct-font-size-label);
+      line-height: var(--ct-line-height-body);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+
+    /* ---- Legend: token names and their one fixed job ---- */
+    .legend { position: absolute; left: 854px; top: 312px; width: 386px; }
+    .legend h2 {
+      margin: 0 0 var(--ct-space-4); padding-bottom: var(--ct-space-3);
+      border-bottom: 1px solid var(--ct-bg3);
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg3);
+    }
+    .lrow {
+      display: flex; justify-content: space-between;
+      padding: var(--ct-space-2) 0;
+      border-bottom: 1px solid var(--ct-bg3);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase;
+    }
+    .ltok { color: var(--ct-fg2); }
+    .lrole { color: var(--ct-fg4); }
+    .focusnote {
+      margin-top: var(--ct-space-4);
+      font-size: var(--ct-font-size-label);
+      line-height: var(--ct-line-height-body);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+    .flat {
+      position: absolute; left: 854px; top: 640px; width: 386px;
+      padding-top: var(--ct-space-4);
+      border-top: 1px solid var(--ct-bg3);
+    }
+    .flat h2 {
+      margin: 0 0 var(--ct-space-2);
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg3);
+    }
+    .flat p {
+      margin: 0;
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+  </style>
+</head>
+<body>
+  <div class="board">
+
+    <div class="statusbar">
+      <div class="wordmark"><span class="mark">//</span> Controlled Technical Design</div>
+      <div class="readouts">
+        <div class="readout">Shape</div>
+        <div class="readout">Structure</div>
+        <div class="readout">Elevation</div>
+        <div class="readout">Accent</div>
+      </div>
+    </div>
+
+    <div class="header">
+      <div class="eyebrow">05 / Foundation</div>
+      <h1 class="title">Surface, Shape &amp; Elevation</h1>
+      <p class="coreline">hard-edged, flat, hairline-built, one sanctioned elevation</p>
+    </div>
+
+    <div class="sheet">
+      <div class="sheet-head">Specimens / token-bound values</div>
+
+      <div class="card c1">
+        <div class="card-head">
+          <span class="card-num">01 / Shape</span>
+          <span class="cap">radius zero everywhere</span>
+        </div>
+        <div class="card-body">
+          <div class="rz-row">
+            <div class="rz-item"><div class="rz-box">[]</div><div class="rz-label">panel</div></div>
+            <div class="rz-item"><div class="rz-box">OK</div><div class="rz-label">button</div></div>
+            <div class="rz-item"><div class="rz-box">||</div><div class="rz-label">input</div></div>
+            <div class="rz-item"><div class="rz-box">01</div><div class="rz-label">tab</div></div>
+          </div>
+          <div class="tok">--ct-radius = 0; corners forced square, never inherited</div>
+        </div>
+      </div>
+
+      <div class="card c2">
+        <div class="card-head">
+          <span class="card-num">02 / Structure</span>
+          <span class="cap">one-pixel solid borders and dotted rules define structure</span>
+        </div>
+        <div class="card-body">
+          <div class="struct-row">
+            <div class="hair-box">--ct-bg3 / 1px solid</div>
+            <div class="hair-box b4">--ct-bg4 / 1px solid</div>
+          </div>
+          <div class="dotted">--ct-color-line / 1px dotted section rule</div>
+          <div class="focus-cell">--ct-color-focus-element / ink rule 2px</div>
+        </div>
+      </div>
+
+      <div class="card c3">
+        <div class="card-head">
+          <span class="card-num">03 / Accent</span>
+          <span class="cap">color states a fact; it never decorates</span>
+        </div>
+        <div class="card-body">
+          <div class="chip-row">
+            <div class="chip red">
+              <span class="word">Urgent / fail</span>
+              <span class="tk">--ct-color-danger<br>--ct-red</span>
+            </div>
+            <div class="chip yellow">
+              <span class="word">Status / WIP</span>
+              <span class="tk">--ct-color-status<br>--ct-yellow</span>
+            </div>
+            <div class="chip green">
+              <span class="word">Action / live</span>
+              <span class="tk">--ct-color-action<br>--ct-green</span>
+            </div>
+            <div class="chip blue">
+              <span class="word">Link</span>
+              <span class="tk">--ct-color-link<br>--ct-blue</span>
+            </div>
+          </div>
+          <div class="tok">accent as left rule or border, never a filled ground</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay">
+      <div class="phead">Overlay / no shadow</div>
+      <div class="prow">light field over dark board</div>
+      <div class="prow">separated by a one-pixel hairline</div>
+      <span class="flatctl">Flat control</span>
+    </div>
+
+    <div class="cap-elev">the only elevation; overlays and controls are flat</div>
+
+    <div class="legend">
+      <h2>Legend / token roles</h2>
+      <div class="lrow"><span class="ltok">--ct-radius</span><span class="lrole">0; square corners</span></div>
+      <div class="lrow"><span class="ltok">--ct-bg3 / --ct-bg4</span><span class="lrole">hairlines</span></div>
+      <div class="lrow"><span class="ltok">--ct-color-line</span><span class="lrole">dotted rule</span></div>
+      <div class="lrow"><span class="ltok">--ct-shadow-panel</span><span class="lrole">sheet only</span></div>
+      <div class="lrow"><span class="ltok">--ct-color-danger</span><span class="lrole">fail / urgent</span></div>
+      <div class="lrow"><span class="ltok">--ct-color-status</span><span class="lrole">status / WIP</span></div>
+      <div class="lrow"><span class="ltok">--ct-color-action</span><span class="lrole">action / live</span></div>
+      <div class="lrow"><span class="ltok">--ct-color-link</span><span class="lrole">navigation</span></div>
+      <div class="lrow"><span class="ltok">--ct-color-focus-element</span><span class="lrole">2px ink rule</span></div>
+      <div class="focusnote">sand marks the window edge; in-surface focus inverts</div>
+    </div>
+
+    <div class="flat">
+      <h2>flat, not glossy</h2>
+      <p>no gradients, no glow, no soft shadows</p>
+    </div>
+
+  </div>
+</body>
+</html>

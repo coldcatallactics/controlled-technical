@@ -1,0 +1,144 @@
+/*
+ * Controlled Technical Design: design tokens. Palette: gruvbox (MIT, © 2017 Pavel Pertsev). See ../ATTRIBUTION.md.
+ * Foundation: Overlay and Substrate: overlays are light; substrates and their edges are dark.
+ *
+ * Semantic tokens are dark-substrate values; light-soft chrome has its own primitive tokens.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* ------------------------------------------------------------------------
+   * Primitive: dark neutral ramp (dark, medium contrast)
+   * ------------------------------------------------------------------------ */
+  --ct-bg0: #282828;       /* primary content background */
+  --ct-bg0-soft: #32302f;  /* raised surface / selected-tab surface */
+  --ct-bg1: #3c3836;
+  --ct-bg2: #504945;
+  --ct-bg3: #665c54;       /* border / hairline / muted rule */
+  --ct-bg4: #7c6f64;       /* muted border / secondary rule */
+  --ct-fg0: #fbf1c7;       /* max emphasis */
+  --ct-fg1: #ebdbb2;       /* primary foreground */
+  --ct-fg2: #d5c4a1;       /* secondary foreground */
+  --ct-fg3: #bdae93;
+  --ct-fg4: #a89984;       /* tertiary */
+  --ct-gray: #928374;      /* disabled / comments */
+
+  /* ------------------------------------------------------------------------
+   * Primitive: chromatic accents (dark values)
+   * ------------------------------------------------------------------------ */
+  --ct-red: #cc241d;
+  --ct-green: #98971a;
+  --ct-yellow: #d79921;
+  --ct-blue: #458588;
+  --ct-purple: #b16286;
+  --ct-aqua: #689d6a;
+  --ct-orange: #d65d0e;
+
+  /* ------------------------------------------------------------------------
+   * Primitive: bright variants (dark mode; contrast on bg0 demands it)
+   * ------------------------------------------------------------------------ */
+  --ct-red-bright: #fb4934;
+  --ct-green-bright: #b8bb26;
+  --ct-yellow-bright: #fabd2f;
+  --ct-blue-bright: #83a598;
+  --ct-purple-bright: #d3869b;
+  --ct-aqua-bright: #8ec07c;
+  --ct-orange-bright: #fe8019;
+
+  /* ------------------------------------------------------------------------
+   * Primitive: light-soft chrome palette (menus, tooltips, popups, bars, launcher)
+   * ------------------------------------------------------------------------ */
+  --ct-chrome-bg: #f2e5bc;             /* paper */
+  --ct-chrome-bg1: #ebdbb2;            /* raised / hover */
+  --ct-chrome-bg2: #d5c4a1;
+  --ct-chrome-fg: #3c3836;             /* ink on paper */
+  --ct-chrome-muted: #665c54;
+  --ct-chrome-border: #7c6f64;         /* brown hairline / rule */
+
+  /* ------------------------------------------------------------------------
+   * Primitive: signature focus / window-border values (§2.7)
+   * ------------------------------------------------------------------------ */
+  --ct-focus-sand: #c9b890;            /* focused border / primary focus marker */
+  --ct-focus-unfocused: #7c6f64;
+  --ct-focus-unfocused-neutral: #444444;
+  --ct-focus-urgent-light: #9d0006;
+  --ct-focus-urgent-dark: #cc241d;
+
+  /* ------------------------------------------------------------------------
+   * Semantic: content-surface roles and controlled color contract
+   * ------------------------------------------------------------------------ */
+  --ct-color-paper: #32302f;                            /* page / content surface background */
+  --ct-color-surround: #282828;                         /* body behind the frame; hover */
+  --ct-color-ink: #d5c4a1;                              /* text, borders, active nav */
+  --ct-color-muted: #a89984;                            /* secondary text, notes */
+  --ct-color-muted-2: #928374;                          /* tertiary */
+  --ct-color-line: #665c54;                             /* hairlines, dotted rules */
+  --ct-color-rule: #7c6f64;                             /* brown hairline / secondary rule */
+
+  /* Functional roles */
+  --ct-color-link: #458588;                             /* blue: links / navigation */
+  --ct-color-action: #98971a;                           /* green: action / positive / live */
+  --ct-color-status: #d79921;                           /* yellow: status / in-progress / wip */
+  --ct-color-danger: #cc241d;                           /* red: fail / urgent / error */
+  --ct-color-focus-board: #c9b890;                         /* active window border only (sand) */
+  --ct-color-focus-element: #d5c4a1;                    /* in-surface focus/selection rule: ink on light overlays, fg2 on dark substrates */
+
+  /* Reserved accents: additional quantities / auxiliary constructions */
+  --ct-color-purple: #b16286;
+  --ct-color-aqua: #689d6a;
+  --ct-color-orange: #d65d0e;
+
+  /* ------------------------------------------------------------------------
+   * Type: two fixed roles plus the optional content role
+   * ------------------------------------------------------------------------ */
+  --ct-font-mono: "Hack Nerd Font", "Hack", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --ct-font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --ct-font-serif: "Libertinus Serif", serif;
+
+  --ct-font-size-label: 11px;    /* labels, shortcuts, tooltips */
+  --ct-font-size-chrome: 12px;   /* dense chrome (10-12.5px) */
+  --ct-font-size-ui: 14px;       /* mono anchor / default, titles / emphasis (700) */
+  --ct-font-size-title: 14px;
+  --ct-font-size-body: 16px;     /* sans base */
+  --ct-line-height-body: 1.55;
+  --ct-line-height-heading: 1.2;
+  --ct-letter-spacing-structure: 0.06em;  /* 0.04em-0.08em */
+  --ct-measure-intro: 66ch;
+  --ct-measure-prose: 68ch;
+  --ct-measure-body: 72ch;
+  --ct-measure-notes: 76ch;
+
+  /* ------------------------------------------------------------------------
+   * Space: compact rhythm (§4)
+   * ------------------------------------------------------------------------ */
+  --ct-space-1: 3px;   /* inner gap */
+  --ct-space-2: 5px;   /* outer gap */
+  --ct-space-3: 6px;   /* minimum padding / margin */
+  --ct-space-4: 8px;   /* bar padding */
+  --ct-space-5: 10px;  /* maximum margin */
+  --ct-space-6: 12px;  /* module gap */
+  --ct-space-7: 14px;  /* minimum rail block */
+  --ct-space-8: 18px;  /* maximum padding block / rail block */
+  --ct-space-9: 24px;  /* view cell */
+
+  /* ------------------------------------------------------------------------
+   * Radius: zero everywhere
+   * ------------------------------------------------------------------------ */
+  --ct-radius: 0;
+
+  /* ------------------------------------------------------------------------
+   * Shadow: content sheet only (the single sanctioned hard, flat elevation)
+   * No shadows on overlays; this is the content sheet's 'sheet on a board' cue.
+   * --ct-shadow-panel is kept for compatibility but applies ONLY to the content
+   * sheet; it is NOT a general panel/control shadow.
+   * ------------------------------------------------------------------------ */
+  --ct-shadow-panel: 4px 4px 0 rgba(0, 0, 0, 0.35);
+
+  /* ------------------------------------------------------------------------
+   * Motion: structural transitions only
+   * ------------------------------------------------------------------------ */
+  --ct-ease: cubic-bezier(0.2, 0, 0, 1);
+  --ct-duration-fast: 100ms;    /* small surfaces: 80-120ms */
+  --ct-duration-medium: 120ms;  /* window / view motion (single curve), <=120ms */
+}

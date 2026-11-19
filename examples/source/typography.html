@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Type Specimen</title>
+  <link rel="stylesheet" href="../../tokens/tokens.css">
+  <style>
+    html, body {
+      margin: 0;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+      background: var(--ct-bg0);
+      font-family: var(--ct-font-mono);
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    .board { position: relative; width: 1280px; height: 800px; background: var(--ct-bg0); }
+
+    /* ---- Light overlay: status bar docked at the top edge ---- */
+    .statusbar {
+      position: absolute; left: 0; top: 0; width: 1280px; height: 38px;
+      background: var(--ct-chrome-bg);
+      border-bottom: 1px solid var(--ct-chrome-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 var(--ct-space-8);
+    }
+    .wordmark {
+      font-size: var(--ct-font-size-chrome); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-fg); white-space: nowrap;
+    }
+    .wordmark .mark { color: var(--ct-chrome-muted); font-weight: 400; }
+    .readouts { display: flex; align-items: center; }
+    .readout {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-muted); white-space: nowrap;
+      padding: 0 var(--ct-space-6);
+    }
+    .readout + .readout { border-left: 1px solid var(--ct-chrome-border); }
+
+    /* ---- Board heading: all structure in the monospace role ---- */
+    .eyebrow {
+      position: absolute; left: 44px; top: 60px;
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+    .title {
+      position: absolute; left: 44px; top: 80px;
+      font-size: var(--ct-font-size-ui); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg1);
+    }
+    .subtitle {
+      position: absolute; right: 44px; top: 84px;
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+
+    /* ---- Dark content sheet: the only surface carrying a panel shadow ---- */
+    .sheet {
+      position: absolute; left: 40px; top: 116px; width: 1200px; height: 640px;
+      background: var(--ct-bg0-soft);
+      border: 1px solid var(--ct-bg3);
+      border-radius: var(--ct-radius);
+      box-shadow: var(--ct-shadow-panel);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .sheet-head {
+      flex: 0 0 36px; height: 36px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 var(--ct-space-8);
+      background: var(--ct-bg1);
+      border-bottom: 1px solid var(--ct-bg3);
+    }
+    .sh-title {
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg2);
+    }
+    .sh-meta {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+
+    /* ---- Specimen grid ---- */
+    .grid {
+      flex: 1; min-height: 0;
+      display: grid; grid-template-columns: 1.55fr 1fr; grid-template-rows: 1fr 1fr;
+    }
+    .cell {
+      padding: var(--ct-space-7);
+      min-height: 0; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .c1 { border-right: 1px solid var(--ct-bg3); border-bottom: 1px solid var(--ct-bg3); }
+    .c2 { border-bottom: 1px solid var(--ct-bg3); }
+    .c3 { border-right: 1px solid var(--ct-bg3); }
+
+    /* ---- Quiet captions naming role, family token, size token, weight ---- */
+    .capblock {
+      border-bottom: 1px solid var(--ct-bg3);
+      padding-bottom: var(--ct-space-4);
+      margin-bottom: var(--ct-space-6);
+      flex: 0 0 auto;
+    }
+    .cap {
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg3);
+      margin-bottom: var(--ct-space-2);
+    }
+    .tokens {
+      font-family: var(--ct-font-mono);
+      font-size: var(--ct-font-size-label);
+      color: var(--ct-fg4);
+      line-height: var(--ct-line-height-body);
+    }
+
+    /* ---- Role 1: structural specimens ---- */
+    .navrow {
+      display: flex; gap: var(--ct-space-6);
+      font-family: var(--ct-font-mono);
+      font-size: var(--ct-font-size-chrome);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg3);
+      border-bottom: 1px solid var(--ct-bg3);
+      padding-bottom: var(--ct-space-4);
+      margin-bottom: var(--ct-space-4);
+      flex: 0 0 auto;
+    }
+    .navrow .on { color: var(--ct-fg0); font-weight: 700; }
+    .navrow .lnk { color: var(--ct-color-link); }
+    .meta {
+      display: grid; grid-template-columns: 110px 1fr;
+      gap: var(--ct-space-2) var(--ct-space-6);
+      margin-bottom: var(--ct-space-6);
+      font-family: var(--ct-font-mono);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase;
+      flex: 0 0 auto;
+    }
+    .meta .k { color: var(--ct-fg4); }
+    .meta .v { color: var(--ct-fg2); }
+    .stat {
+      width: 100%; border-collapse: collapse;
+      font-family: var(--ct-font-mono); font-size: var(--ct-font-size-label);
+      flex: 0 0 auto;
+    }
+    .stat th, .stat td {
+      border: 1px solid var(--ct-bg3);
+      padding: var(--ct-space-3) var(--ct-space-4);
+      text-align: left;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase;
+      line-height: var(--ct-line-height-heading);
+    }
+    .stat th { background: var(--ct-bg1); color: var(--ct-fg3); font-weight: 700; }
+    .stat td { color: var(--ct-fg2); }
+    .stat .code { color: var(--ct-fg4); }
+    .stat .v-ok { color: var(--ct-color-action); }
+    .stat .v-warn { color: var(--ct-color-status); }
+    .stat .v-fail { color: var(--ct-color-danger); }
+    .stat .v-link { color: var(--ct-color-link); }
+
+    /* ---- Role 2: prose specimens, with the tracked mono label above ---- */
+    .ctrast {
+      font-family: var(--ct-font-mono);
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+      margin: 0 0 var(--ct-space-4);
+      flex: 0 0 auto;
+    }
+    .prose {
+      font-family: var(--ct-font-sans);
+      font-size: var(--ct-font-size-body);
+      line-height: var(--ct-line-height-body);
+      color: var(--ct-fg1);
+      max-width: var(--ct-measure-prose);
+      margin: 0 0 var(--ct-space-5);
+      -webkit-font-smoothing: antialiased;
+    }
+    .note {
+      font-family: var(--ct-font-mono);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+      line-height: var(--ct-line-height-body);
+      margin: 0;
+      flex: 0 0 auto;
+    }
+
+    /* ---- Role 3: optional serif content ---- */
+    .serif-h {
+      font-family: var(--ct-font-serif);
+      font-size: var(--ct-font-size-body); font-weight: 700;
+      line-height: var(--ct-line-height-heading);
+      color: var(--ct-fg1);
+      margin: 0 0 var(--ct-space-4);
+    }
+    .serif-q {
+      font-family: var(--ct-font-serif);
+      font-size: var(--ct-font-size-body); font-weight: 400;
+      line-height: var(--ct-line-height-body);
+      color: var(--ct-fg2);
+      max-width: var(--ct-measure-prose);
+      margin: 0 0 var(--ct-space-6);
+      padding-left: var(--ct-space-5);
+      border-left: 2px solid var(--ct-fg2);
+    }
+
+    /* ---- Tabular numeral column ---- */
+    .tabnum {
+      width: 100%; border-collapse: collapse;
+      font-family: var(--ct-font-mono);
+      font-size: var(--ct-font-size-ui);
+      font-variant-numeric: tabular-nums;
+      flex: 0 0 auto;
+    }
+    .tabnum td {
+      padding: var(--ct-space-2) 0;
+      border-bottom: 1px solid var(--ct-bg3);
+    }
+    .tabnum .lbl {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+    .tabnum .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--ct-fg1);
+      font-weight: 700;
+    }
+    .tabcap {
+      font-family: var(--ct-font-mono);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+      margin-top: var(--ct-space-5);
+      flex: 0 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="board">
+
+    <div class="statusbar">
+      <div class="wordmark"><span class="mark">//</span> Controlled Technical Design</div>
+      <div class="readouts">
+        <div class="readout">Structural</div>
+        <div class="readout">Prose</div>
+        <div class="readout">Content</div>
+        <div class="readout">Tabular</div>
+      </div>
+    </div>
+
+    <div class="eyebrow">03 / Foundation / Type</div>
+    <div class="title">Type Specimen</div>
+    <div class="subtitle">Two fixed roles + one optional role</div>
+
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="sh-title">Specimen board / role, family, size, weight</div>
+        <div class="sh-meta">Uppercase tracked structure / case-sensitive prose</div>
+      </div>
+
+      <div class="grid">
+
+        <div class="cell c1">
+          <div class="capblock">
+            <div class="cap">Role 1 / Structural / fixed, required</div>
+            <div class="tokens">--ct-font-mono / --ct-font-size-label, --ct-font-size-chrome, --ct-font-size-ui / 400, 700</div>
+          </div>
+          <div class="navrow">
+            <span class="on">Overview</span>
+            <span>Geometry</span>
+            <span>Components</span>
+            <span class="lnk">Reference</span>
+          </div>
+          <div class="meta">
+            <span class="k">Section</span><span class="v">03 / Type</span>
+            <span class="k">Status</span><span class="v">Settled / v1.0</span>
+          </div>
+          <table class="stat">
+            <thead>
+              <tr><th>Readout</th><th>Code</th><th>State</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Cache</td><td class="code">OK</td><td class="v-ok">Ready</td></tr>
+              <tr><td>Queue</td><td class="code">WRN</td><td class="v-warn">Waiting</td></tr>
+              <tr><td>Peer</td><td class="code">ERR</td><td class="v-fail">Offline</td></tr>
+              <tr><td>Origin</td><td class="code">LNK</td><td class="v-link">Connected</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="cell c2">
+          <div class="capblock">
+            <div class="cap">Role 3 / Content / optional</div>
+            <div class="tokens">--ct-font-serif / --ct-font-size-body / 400, 700</div>
+          </div>
+          <div class="serif-h">On long-form surfaces</div>
+          <p class="serif-q">Long-form content belongs to the optional serif role, not to chrome.</p>
+          <p class="note">Reserved for typeset content surfaces / never labels or interface text</p>
+        </div>
+
+        <div class="cell c3">
+          <div class="capblock">
+            <div class="cap">Role 2 / Prose / fixed, required</div>
+            <div class="tokens">--ct-font-sans / --ct-font-size-body / 400, 700</div>
+          </div>
+          <p class="ctrast">Structural label / tracked, uppercase, mono</p>
+          <p class="prose">Structure lives in the monospace face; prose lives in the sans face.</p>
+          <p class="note">Measure --ct-measure-prose / line height --ct-line-height-body / weights 400, 700</p>
+        </div>
+
+        <div class="cell c4">
+          <div class="capblock">
+            <div class="cap">Numerals / tabular figures</div>
+            <div class="tokens">--ct-font-mono / --ct-font-size-ui / font-variant-numeric: tabular-nums</div>
+          </div>
+          <table class="tabnum">
+            <tbody>
+              <tr><td class="lbl">Samples</td><td class="num">00124</td></tr>
+              <tr><td class="lbl">Queued</td><td class="num">01902</td></tr>
+              <tr><td class="lbl">Active</td><td class="num">14380</td></tr>
+              <tr><td class="lbl">Pending</td><td class="num">00007</td></tr>
+              <tr><td class="lbl">Total</td><td class="num">98765</td></tr>
+            </tbody>
+          </table>
+          <p class="tabcap">fixed-width values do not jitter</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

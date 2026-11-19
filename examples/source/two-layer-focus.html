@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <title>Two-Layer Focus</title>
+  <link rel="stylesheet" href="../../tokens/tokens.css">
+  <style>
+    html, body {
+      margin: 0;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+      background: var(--ct-bg0);
+      font-family: var(--ct-font-mono);
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    .board { position: relative; width: 1280px; height: 800px; background: var(--ct-bg0); }
+
+    /* ---- Light overlay: status bar docked at the top edge ---- */
+    .statusbar {
+      position: absolute; left: 0; top: 0; width: 1280px; height: 38px;
+      background: var(--ct-chrome-bg);
+      border-bottom: 1px solid var(--ct-chrome-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 var(--ct-space-8);
+    }
+    .wordmark {
+      font-size: var(--ct-font-size-chrome); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-fg); white-space: nowrap;
+    }
+    .wordmark .mark { color: var(--ct-chrome-muted); font-weight: 400; }
+    .readouts { display: flex; align-items: center; }
+    .readout {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-muted); white-space: nowrap;
+      padding: 0 var(--ct-space-6);
+    }
+    .readout + .readout { border-left: 1px solid var(--ct-chrome-border); }
+
+    /* ---- Inactive board behind: muted edge, dim chrome ---- */
+    .inactive {
+      position: absolute; left: 118px; top: 92px; width: 1030px; height: 662px;
+      border: 2px solid var(--ct-focus-unfocused);
+      border-radius: var(--ct-radius);
+      background: var(--ct-bg0);
+      opacity: 0.5;
+    }
+    .ghostchrome {
+      height: 66px; background: var(--ct-bg1);
+      border-bottom: 1px solid var(--ct-bg3);
+      padding: 0 var(--ct-space-6);
+      display: flex; align-items: flex-end; gap: var(--ct-space-4);
+    }
+    .ghosttab {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+      border: 1px solid var(--ct-bg3); border-radius: var(--ct-radius);
+      padding: var(--ct-space-3) var(--ct-space-6);
+    }
+
+    /* ---- Layer 1: the active board edge. Sand lives here and nowhere inside. ---- */
+    .active {
+      position: absolute; left: 56px; top: 56px; width: 1000px; height: 664px;
+      border: 2px solid var(--ct-focus-sand);
+      border-radius: var(--ct-radius);
+      background: var(--ct-bg0);
+      z-index: 2;
+      display: flex; flex-direction: column;
+    }
+    .actchrome { height: 58px; background: var(--ct-bg1); border-bottom: 1px solid var(--ct-bg3); }
+    .acttab {
+      height: 30px; width: 248px; display: flex; align-items: center;
+      padding: 0 var(--ct-space-6);
+      background: var(--ct-bg0-soft);
+      border-bottom: 1px solid var(--ct-bg3);
+      border-right: 1px solid var(--ct-bg3);
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg1);
+    }
+    .acttools {
+      height: 27px; display: flex; align-items: center; gap: var(--ct-space-4);
+      padding: 0 var(--ct-space-5);
+    }
+    .acttools span {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+      border: 1px solid var(--ct-bg3); border-radius: var(--ct-radius);
+      padding: 1px var(--ct-space-4);
+    }
+
+    .work { flex: 1; padding: var(--ct-space-8); position: relative; }
+
+    /* ---- Dark substrate panel: inversion + 2px rule on a dark surface ---- */
+    .darkpanel {
+      width: 700px; height: 520px; background: var(--ct-bg1);
+      border: 1px solid var(--ct-bg3);
+      border-radius: var(--ct-radius);
+      padding: var(--ct-space-6);
+      display: flex; flex-direction: column; gap: var(--ct-space-3);
+    }
+    .dcell {
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+      border: 1px solid var(--ct-bg3); border-radius: var(--ct-radius);
+      padding: var(--ct-space-4);
+    }
+    .dcell.focus {
+      background: var(--ct-fg2);
+      color: var(--ct-bg0);
+      border: 2px solid var(--ct-fg2);
+      padding: calc(var(--ct-space-4) - 1px);
+      font-weight: 700;
+    }
+
+    /* ---- Light overlay popup floating above the dark work area ---- */
+    .popup {
+      position: absolute; right: 56px; top: 140px; width: 300px; z-index: 5;
+      background: var(--ct-chrome-bg);
+      border: 1px solid var(--ct-chrome-border);
+      border-radius: var(--ct-radius);
+    }
+    .phead {
+      padding: var(--ct-space-4) var(--ct-space-5);
+      border-bottom: 1px solid var(--ct-chrome-border);
+      font-size: var(--ct-font-size-label); font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-muted);
+    }
+    .prow {
+      padding: var(--ct-space-4) var(--ct-space-5);
+      border-bottom: 1px solid var(--ct-chrome-border);
+      font-size: var(--ct-font-size-label);
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-chrome-muted);
+    }
+    .prow:last-child { border-bottom: none; }
+    .prow.focus {
+      background: var(--ct-chrome-fg);
+      color: var(--ct-chrome-bg);
+      border: 2px solid var(--ct-chrome-fg);
+      padding: calc(var(--ct-space-4) - 1px) calc(var(--ct-space-5) - 1px);
+      font-weight: 700;
+    }
+
+    /* ---- Quiet captions naming the two focus layers ---- */
+    .cap {
+      position: absolute;
+      font-size: var(--ct-font-size-label);
+      font-weight: 700;
+      letter-spacing: var(--ct-letter-spacing-structure);
+      text-transform: uppercase; color: var(--ct-fg4);
+    }
+    .cap-layer1 { right: 18px; top: 60px; width: 196px; line-height: var(--ct-line-height-body); }
+    .cap-layer2 { left: 56px; top: 764px; width: 900px; }
+  </style>
+</head>
+<body>
+  <div class="board">
+
+    <div class="statusbar">
+      <div class="wordmark"><span class="mark">//</span> Controlled Technical Design</div>
+      <div class="readouts">
+        <div class="readout">Overlay</div>
+        <div class="readout">Substrate</div>
+        <div class="readout">Focus</div>
+      </div>
+    </div>
+
+    <div class="inactive">
+      <div class="ghostchrome">
+        <span class="ghosttab">Panels</span>
+        <span class="ghosttab">Layout</span>
+        <span class="ghosttab">Inspect</span>
+      </div>
+    </div>
+
+    <div class="active">
+      <div class="actchrome">
+        <div class="acttab">Focus / local inversion</div>
+        <div class="acttools">
+          <span>Back</span>
+          <span>Forward</span>
+          <span>Reload</span>
+          <span>Contents</span>
+        </div>
+      </div>
+
+      <div class="work">
+        <div class="darkpanel">
+          <div class="dcell">Layer / field</div>
+          <div class="dcell">Structure / hairline</div>
+          <div class="dcell focus">Focus / local inversion</div>
+          <div class="dcell">Edge / muted rule</div>
+          <div class="dcell">Motion / schematic</div>
+          <div class="dcell">Colour / functional only</div>
+        </div>
+
+        <div class="popup">
+          <div class="phead">Content actions</div>
+          <div class="prow">Copy link</div>
+          <div class="prow focus">View source</div>
+          <div class="prow">Print sheet</div>
+          <div class="prow">Close menu</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cap cap-layer1">Layer 1 / sand on the board edge only</div>
+    <div class="cap cap-layer2">Layer 2 / in-surface inversion + 2px rule; no sand, no second hue</div>
+
+  </div>
+</body>
+</html>
